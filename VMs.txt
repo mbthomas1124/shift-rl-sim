@@ -1,0 +1,12 @@
+                IP                  Cores / RAM     HDD         OS              Host Group
+Zhiyuan         155.246.104.52      16 / 16         300GB       Ubuntu 18.04    2
+Zhiyuan         155.246.104.62      16 / 16         300GB       Ubuntu 18.04    2
+Bharddwaj       155.246.104.82      16 / 16         300GB       Ubuntu 18.04    2
+Eden            155.246.104.83      16 / 16         300GB       Ubuntu 18.04    2
+Patrick         155.246.104.84      16 / 16         300GB       Ubuntu 18.04    2
+                155.246.104.85      16 / 16         300GB       Ubuntu 18.04    2
+Ang             155.246.104.86      16 / 16         300GB       Ubuntu 18.04    2
+Ang             155.246.104.87      16 / 16         300GB       Ubuntu 18.04    2
+Sriram          155.246.104.88      16 / 16         300GB       Ubuntu 18.04    2
+Sriram          155.246.104.89      16 / 16         300GB       Ubuntu 18.04    2
+Zhiyuan         155.246.104.90      16 / 32         300GB       Ubuntu 18.04    2

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# different output colors
+COLOR='\033[1;36m'          # bold;cyan
+COLOR_WARNING='\033[1;33m'  # bold;yellow
+COLOR_PROMPT='\033[1;32m'   # bold;green
+COLOR_ERROR='\033[1;31m'    # bold;red
+NO_COLOR='\033[0m'
+
+startAll(){
+        echo 'starting... . . . '
+        cd /home/shiftpub/SHIFT
+
+        ./startup.sh
+        sleep 5
+
+        echo 'servers done.'
+
+        cd /home/shiftpub/shift-research/agents/ZITrader
+
+        ./batch.sh
+
+        echo 'ZIT done'
+
+        sleep 5
+        cd /home/shiftpub/shift-research/agents/MarketMaker
+
+        ./batch.sh
+        echo 'MarketMaker done'
+
+
+        echo 'completed'
+}
+
+
+
+stopAll(){
+        echo 'stopping... . . . '
+        cd /home/shiftpub/SHIFT
+
+        ./startup.sh -k
+        sleep 5
+
+        echo 'servers stopped.'
+                                      
+
+	cd /home/shiftpub/shift-research/agents/ZITrader
+
+        killall -9 ZITrader
+
+        echo 'ZIT Stopped'
+
+        sleep 5
+        cd /home/shiftpub/shift-research/agents/MarketMaker
+
+        killall -9 MarketMaker
+        echo 'MarketMaker Stopped'
+
+
+        echo 'completed'
+}
+
+
+if [ $# -lt 1 ]
+then
+  echo "Usage: $0 start  "
+  echo "Usage: $0 stop  "
+  exit 1
+fi
+
+echo "$0 called with option $1 "
+
+
+if [ "${1}" ==  start ]
+then
+  startAll
+  exit 0
+
+else
+ stopAll
+ exit 0
+
+#else
+#  echo 'unknown param option passed'
+#  exit 1
+fi
+
