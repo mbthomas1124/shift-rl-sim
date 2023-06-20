@@ -38,7 +38,7 @@ def get_args():
     parser.add_argument('--buffer-size', type=int, default=5)
     parser.add_argument('--lr', type=float, default=0.0001)
     parser.add_argument('--gamma', type=float, default=0.95)
-    parser.add_argument('--epoch', type=int, default=620)
+    parser.add_argument('--epoch', type=int, default=400)
     parser.add_argument('--step-per-epoch', type=int, default=100)
     parser.add_argument('--episode-per-collect', type=int, default=20)
     parser.add_argument('--repeat-per-collect', type=int, default=2)
@@ -275,16 +275,16 @@ def test_ppo_resume(args=get_args()):
 
 if __name__ == "__main__":
     tickers = ["CS1"]#,"CS2"
-    num_proc = 7
+    num_proc = 12
     trader_list = []
     threads = []
-    weights = [0.5, 0.5, 0.2, 0.4, 0.5, 0.6, 0.8]#
-    agent_type = ["mm", "mm", "lt", "lt", "lt", "lt","lt"]#
+    weights = [0.5, 0.5, 0.2, 0.4, 0.5, 0.6, 0.8, 0.2, 0.4, 0.5, 0.6, 0.8]#
+    agent_type = ["mm", "mm", "lt", "lt", "lt", "lt","lt", "lt", "lt", "lt", "lt","lt"]#
 
     #torch.manual_seed(0)
     for ticker in tickers:
         if ticker == "CS1": mm_index, lt_index = 0, 0
-        elif ticker == "CS2": mm_index, lt_index = 2, 5
+        elif ticker == "CS2": mm_index, lt_index = 2, 10
         for i in range(num_proc):
             if agent_type[i] == "mm":
                 trader_list.append(shift.Trader(f"marketmaker_rl_{mm_index+1}"))
