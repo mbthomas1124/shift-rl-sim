@@ -40,7 +40,7 @@ cd /home/shiftpub/shift-research/rl/RL_with_ZI
 python sim_utils.py
 
 cd ~/SHIFT
-./startup.sh
+./startup.sh -t 1440
 
 #sleep 5
 cd /home/shiftpub/shift-research/agents/ZITrader
