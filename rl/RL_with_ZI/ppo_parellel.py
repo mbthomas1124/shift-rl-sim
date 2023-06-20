@@ -36,9 +36,9 @@ def get_args():
     parser.add_argument('--reward-threshold', type=float, default=None)
     parser.add_argument('--seed', type=int, default=1)
     parser.add_argument('--buffer-size', type=int, default=5)
-    parser.add_argument('--lr', type=float, default=0.01)
+    parser.add_argument('--lr', type=float, default=0.0001)
     parser.add_argument('--gamma', type=float, default=0.95)
-    parser.add_argument('--epoch', type=int, default=2)
+    parser.add_argument('--epoch', type=int, default=400)
     parser.add_argument('--step-per-epoch', type=int, default=100)
     parser.add_argument('--episode-per-collect', type=int, default=20)
     parser.add_argument('--repeat-per-collect', type=int, default=2)
@@ -69,7 +69,7 @@ def get_args():
 
 
 def test_ppo(trader, trader_id, w, agent_type, ticker, args=get_args()):
-    test_steps = 30
+    test_steps = 10000
 
     try:
         #natural stop:
@@ -85,6 +85,7 @@ def test_ppo(trader, trader_id, w, agent_type, ticker, args=get_args()):
                 symbol=ticker,
                 max_order_list_length=20,
                 weight = w,
+                gamma = 0.2,#increased from 0.09 to 0.2
                 tar_m = 0.6)
             
             args.state_shape = env.observation_space.shape or env.observation_space.n
@@ -126,7 +127,7 @@ def test_ppo(trader, trader_id, w, agent_type, ticker, args=get_args()):
                 order_size=10,
                 target_buy_frac=w,
                 target_sell_frac=1-w,
-                risk_aversion=0.5,
+                risk_aversion=1, #increased from 0.5
                 pnl_weighting=0.5,
                 normalizer=0.01,
                 order_book_range=5,
@@ -274,16 +275,16 @@ def test_ppo_resume(args=get_args()):
 
 if __name__ == "__main__":
     tickers = ["CS1"]#,"CS2"
-    num_proc = 7
+    num_proc = 12
     trader_list = []
     threads = []
-    weights = [0.5, 0.5, 0.2, 0.4, 0.5, 0.6, 0.8]#
-    agent_type = ["mm", "mm", "lt", "lt", "lt", "lt","lt"]#
+    weights = [0.5, 0.5, 0.2, 0.4, 0.5, 0.6, 0.8, 0.2, 0.4, 0.5, 0.6, 0.8]#
+    agent_type = ["mm", "mm", "lt", "lt", "lt", "lt","lt", "lt", "lt", "lt", "lt","lt"]#
 
     #torch.manual_seed(0)
     for ticker in tickers:
         if ticker == "CS1": mm_index, lt_index = 0, 0
-        elif ticker == "CS2": mm_index, lt_index = 2, 5
+        elif ticker == "CS2": mm_index, lt_index = 2, 10
         for i in range(num_proc):
             if agent_type[i] == "mm":
                 trader_list.append(shift.Trader(f"marketmaker_rl_{mm_index+1}"))
@@ -291,7 +292,8 @@ if __name__ == "__main__":
                 mm_index += 1
 
             elif agent_type[i] == "lt":
-                trader_list.append(shift.Trader(f"liquiditytaker_rl_0{lt_index+1}"))
+                num = "{:02d}".format(lt_index+1)
+                trader_list.append(shift.Trader(f"liquiditytaker_rl_{num}"))
                 threads.append(Thread(target=test_ppo,args =(trader_list[i], f"lt{lt_index+1}", weights[i], agent_type[i], ticker, get_args())))        
                 lt_index += 1
 
