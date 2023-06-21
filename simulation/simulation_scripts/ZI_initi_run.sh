@@ -31,7 +31,7 @@ function reset_server
     echo "Resetting portfolio and trading records..."
     echo -e ${NO_COLOR}
 
-    cd /home/shiftpub/shift-research/agents/ZITrader
+    cd /home/shiftpub/shift-rl-sim/agents/ZITrader
     # [ -d output ] && rm -r output
     cd ~/SHIFT
     ./startup.sh -m DE ME BC -r </dev/null >/dev/null 2>&1
@@ -49,7 +49,7 @@ function random_setup {
     InitializationProgram -b 101 -e 200 -t CS2 -p 100 -s 10000 </dev/null >/dev/null 2>&1
 
     #initialize rl agent:
-    cd /home/shiftpub/shift-research/rl/RL_with_ZI
+    cd /home/shiftpub/shift-rl-sim/RL_with_ZI
     python sim_utils.py
 
     # go back to directory from which the script is being run from
