@@ -36,14 +36,14 @@ InitializationProgram -n 5 -b 1 -e 100 -t CS1 -p 100 -s 10000 </dev/null >/dev/n
 #InitializationProgram -y 5 -b 201 -e 300 -t CS3 -p 100 -s 10000 </dev/null >/dev/null 2>&1
 
 #initialize rl agent:
-cd /home/shiftpub/shift-research/rl/RL_with_ZI
+cd /home/shiftpub/shift-rl-sim/simulation
 python sim_utils.py
 
 cd ~/SHIFT
 ./startup.sh -t 1440
 
 #sleep 5
-cd /home/shiftpub/shift-research/agents/ZITrader
+cd /home/shiftpub/shift-rl-sim/agents/ZITrader
 #./batch.sh
 #./batch_ultimate.sh -t 2 -a 100 -s 5
 echo -e ${COLOR}
