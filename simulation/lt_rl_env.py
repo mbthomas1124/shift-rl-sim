@@ -172,7 +172,7 @@ class SHIFT_env(gym.Env):
         # return size and type of filled order
         # if order was not filled, cancel it and return (0, None)
         order = self.trader.get_order(order_id)
-        #print(order.status)
+        # print(order.status)
         if order.status == shift.Order.Status.FILLED:
             return True
         else:
@@ -247,13 +247,12 @@ class SHIFT_env(gym.Env):
                 )
                 return np.array(state)
             else:
-                #print("waiting for to collect more data")
+                # print("waiting for to collect more data")
                 sleep(1)
 
     def step(self, action):
-        action = action[0]
         act_dir = self.action_params[action]
-        #print(act_dir)
+        # print(act_dir)
 
         # ACTION: #################################################################################################################
         order_id = self.execute_action(action)
@@ -294,7 +293,7 @@ class SHIFT_env(gym.Env):
         delta_q = curr_q - self.prev_q
         self.prev_q = curr_q
         reward = (self.w * self.alpha * total_pnl) + ((1 - self.w) * delta_q)
-        #print(f"{self.symbol} Reward: {reward}")
+        # print(f"{self.symbol} Reward: {reward}")
 
         # end conditions
         done = False
@@ -320,7 +319,7 @@ class SHIFT_env(gym.Env):
         self.stats["sell_frac"].append(self.sell_count / self.steps_elapsed)
         self.stats["curr_q"].append(curr_q)
 
-        return state, reward, done, dict()
+        return state, reward, done, False, dict()
 
     def close_positions(self):
         # close all positions for given ticker
@@ -397,9 +396,9 @@ class SHIFT_env(gym.Env):
     def kill_thread(self):
         self.data_thread_alive = False
 
-    def save_to_csv(self,epoch):
+    def save_to_csv(self, epoch):
         df = pd.DataFrame.from_dict(self.stats)
-        df.to_csv(f'./iteration_info/{epoch}.csv', index=False)
+        df.to_csv(f"./iteration_info/{epoch}.csv", index=False)
 
     def _getCurrentPosition(self):
         return int(self.trader.getPortfolioItem(self.symbol).getShares())
