@@ -1,0 +1,10 @@
+BrokerageCenter -u liquiditytaker_rl_01 -p password -i Liquidity Taker liquiditytaker1@shift -s
+BrokerageCenter -u liquiditytaker_rl_02 -p password -i Liquidity Taker liquiditytaker2@shift -s
+BrokerageCenter -u liquiditytaker_rl_03 -p password -i Liquidity Taker liquiditytaker3@shift -s
+BrokerageCenter -u liquiditytaker_rl_04 -p password -i Liquidity Taker liquiditytaker4@shift -s
+BrokerageCenter -u liquiditytaker_rl_05 -p password -i Liquidity Taker liquiditytaker5@shift -s
+BrokerageCenter -u liquiditytaker_rl_06 -p password -i Liquidity Taker liquiditytaker6@shift -s
+BrokerageCenter -u liquiditytaker_rl_07 -p password -i Liquidity Taker liquiditytaker7@shift -s
+BrokerageCenter -u liquiditytaker_rl_08 -p password -i Liquidity Taker liquiditytaker8@shift -s
+BrokerageCenter -u liquiditytaker_rl_09 -p password -i Liquidity Taker liquiditytaker9@shift -s
+BrokerageCenter -u liquiditytaker_rl_10 -p password -i Liquidity Taker liquiditytaker10@shift -s

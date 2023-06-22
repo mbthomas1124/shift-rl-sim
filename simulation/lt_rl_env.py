@@ -319,7 +319,7 @@ class SHIFT_env(gym.Env):
         self.stats["sell_frac"].append(self.sell_count / self.steps_elapsed)
         self.stats["curr_q"].append(curr_q)
 
-        return state, reward, done, dict()
+        return state, reward, done, False, dict()
 
     def close_positions(self):
         # close all positions for given ticker
