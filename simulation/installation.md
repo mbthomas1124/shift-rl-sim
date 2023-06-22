@@ -13,6 +13,8 @@ wget https://github.com/hanlonlab/shift-python/releases/download/v2.0.1/shift_py
 unzip shift_python-2.0.1-conda_linux.zip
 cd shift_python-2.0.1-conda_linux/
 conda install *
+cd ..
+rm -rf shift_python-2.0.1-conda_linux/
 ```
 
 Install Tianshou (with Torch)
