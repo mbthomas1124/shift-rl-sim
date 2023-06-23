@@ -369,7 +369,7 @@ if __name__ == "__main__":
     try:
         for i in range(len(trader_list)):  # len(tickers)*
             trader_list[i].disconnect()
-            trader_list[i].connect("initiator.cfg", "password")
+            trader_list[i].connect("/home/shiftpub/initiator.cfg", "password")
             trader_list[i].sub_all_order_book()
             sleep(1)
             print(

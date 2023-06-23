@@ -37,6 +37,9 @@ def setup_init_portfolio(*, con, trader: str, portfolio: dict):
 
 if __name__ == "__main__":
     import sqlalchemy
+    import sys
+
+    sys.path.insert(1, "/home/shiftpub")
     from db_config import db_string
 
     print(db_string)
