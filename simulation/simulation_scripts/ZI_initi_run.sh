@@ -49,7 +49,7 @@ function random_setup {
     InitializationProgram -b 101 -e 200 -t CS2 -p 100 -s 10000 </dev/null >/dev/null 2>&1
 
     #initialize rl agent:
-    cd /home/shiftpub/shift-rl-sim/RL_with_ZI
+    cd /home/shiftpub/shift-rl-sim/simulation
     python sim_utils.py
 
     # go back to directory from which the script is being run from
@@ -69,7 +69,7 @@ function start_sim
     # 2-stock scenario
     cd ~/SHIFT
     ./startup.sh
-    cd /home/shiftpub/shift-research/agents/ZITrader
+    cd /home/shiftpub/shift-rl-sim/agents/ZITrader
     ./batch2.sh
 
     # go back to directory from which the script is being run from
@@ -93,7 +93,7 @@ function new_seed_setup
     InitializationProgram -n ${1} -b 101 -e 200 -t CS2 -p 100 -s 10000 </dev/null >/dev/null 2>&1
 
     #initialize rl agent:
-    cd /home/shiftpub/shift-research/rl/RL_with_ZI
+    cd /home/shiftpub/shift-rl-sim/simulation
     python sim_utils.py
 
     # go back to directory from which the script is being run from
@@ -118,7 +118,7 @@ function repeat_seed_setup
     InitializationProgram -y ${1} -b 101 -e 200 -t CS2 -p 100 -s 10000 </dev/null >/dev/null 2>&1
 
     #initialize rl agent:
-    cd /home/shiftpub/shift-research/rl/RL_with_ZI
+    cd /home/shiftpub/shift-rl-sim/simulation
     python sim_utils.py
 
     # go back to directory from which the script is being run from
@@ -134,7 +134,7 @@ function repeat_seed_setup
 
 function kill_sim
 {
-    #cd /home/shiftpub/shift-research/agents/ZITrader
+    #cd /home/shiftpub/shift-rl-sim/agents/ZITrader
     # [ -d output ] && rm -r output
     cd ~/SHIFT
     ./startup.sh -k #</dev/null >/dev/null 2>&1
