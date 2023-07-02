@@ -398,7 +398,7 @@ class SHIFT_env(gym.Env):
 
     def save_to_csv(self, epoch):
         df = pd.DataFrame.from_dict(self.stats)
-        df.to_csv(f"./iteration_info/{epoch}.csv", index=False)
+        df.to_csv(epoch, index=False)
 
     def _getCurrentPosition(self):
         return int(self.trader.getPortfolioItem(self.symbol).getShares())
