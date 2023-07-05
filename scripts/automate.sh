@@ -7,16 +7,18 @@ COLOR_PROMPT='\033[1;32m'   # bold;green
 COLOR_ERROR='\033[1;31m'    # bold;red
 NO_COLOR='\033[0m'
 
+
+
 function run_ppo
 {
-    if [ $# -ne 1 ]
+    if [ $# -ne 2 ]
     then
-        echo "Incorrect number of arguments supplied"
+        echo "[${1}] Incorrect number of arguments supplied"
         return 1
     fi
     
     echo -e ${COLOR_WARNING}
-    echo "Start Simulation..."
+    echo "[${1}] Start Simulation..."
     echo -e ${NO_COLOR}
 
     ssh shiftpub@${1} "
@@ -27,7 +29,7 @@ function run_ppo
     "
 
     echo -e ${COLOR}
-    echo "Start Training..."
+    echo "[${1}] Start Training..."
     echo -e ${NO_COLOR}
 
 
@@ -35,11 +37,11 @@ function run_ppo
         . /home/shiftpub/miniconda/etc/profile.d/conda.sh;
         conda activate rlsim;
         cd ~/shift-rl-sim/simulation;
-        python ppo_parallel.py > ~/Results_Simulation/logs/ppo_parallel.log
+        nohup python -u ppo_parallel.py > ${2} &
     "
 
     echo -e ${COLOR}
-    echo "Done."
+    echo "[${1}] Done."
     echo -e ${NO_COLOR}
 }
 
@@ -80,18 +82,18 @@ function send_dir
     # send the directory to the same location on remote machine. 
     if [ $# -ne 2 ]
     then
-        echo "Incorrect number of arguments supplied"
+        echo "[${1}] Incorrect number of arguments supplied"
         return 1
     fi
     
     echo -e ${COLOR_WARNING}
-    echo "Send file from ${2} to shiftpub@${1}:${2} ..."
+    echo "[${1}] Send file from ${2} to shiftpub@${1}:${2} ..."
     echo -e ${NO_COLOR}
 
     ssh shiftpub@${1} "
     if [ ! -d ${2} ]
     then
-        echo "Creating dir on remote shiftpub@${1}:${2}"
+        echo "[${1}] Creating dir on remote shiftpub@${1}:${2}"
         mkdir -p ${2}
     fi
     "
@@ -99,7 +101,7 @@ function send_dir
     rsync -r ${2}/* shiftpub@${1}:${2}
 
     echo -e ${COLOR}
-    echo "Done."
+    echo "[${1}] Done."
     echo -e ${NO_COLOR}
 }
 
@@ -109,26 +111,48 @@ function fetch_dir
     # fetch the directory to the current machine at ~/receive/{ip}/
     if [ $# -ne 2 ]
     then
-        echo "Incorrect number of arguments supplied"
+        echo "[${1}] Incorrect number of arguments supplied"
         return 1
     fi
     
-    echo -e ${COLOR_WARNING}
-    echo "Fetch file from shiftpub@${1}:${2} to ~/receive/${1}/..."
+    echo -e ${COLOR}
+    echo "[${1}] Fetch file from shiftpub@${1}:${2} to ~/receive/${1}/..."
     echo -e ${NO_COLOR}
 
-    [ ! -d "~/receive/${1}/" ] && echo "Directory "~/receive/${1}/" DOES NOT exists. Making the directory"; mkdir -p ~/receive/${1}/;
+    [ ! -d /home/shiftpub/receive/${1}/ ] && (echo -e ${COLOR_WARNING}; echo "Directory "~/receive/${1}/" DOES NOT exists. Making the directory"; mkdir -p ~/receive/${1}/;echo -e ${NO_COLOR};)
+    
+    [ ! -d /home/shiftpub/receive/155.246.104.85/ ]
     rsync -r shiftpub@${1}:${2} ~/receive/${1}/
 
     echo -e ${COLOR}
-    echo "Done."
+    echo "[${1}] Done."
     echo -e ${NO_COLOR}
 }
 
 function check_training
 {
-    echo "TODO"
-    echo "TODO"
+    if [ $# -ne 2 ]
+    then
+        echo "[${1}] Incorrect number of arguments supplied"
+        return 1
+    fi
+    echo -e ${COLOR}
+    echo "[${1}] Check SHIFT status"
+    echo -e ${NO_COLOR}
+
+    ssh shiftpub@${1} "
+        cd ~/SHIFT;
+        ./startup.sh -s;
+    "
+
+    echo -e ${COLOR}
+    echo "[${1}] Check Python outputs"
+    echo -e ${NO_COLOR}
+
+
+    ssh shiftpub@${1} "
+        tail -n 100 ${2}
+    "
     # print SHIFT status
     # print tail logs python
     # print python process
