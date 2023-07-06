@@ -3,7 +3,7 @@ import argparse
 import os
 import pprint
 from threading import Thread
-import gym
+import gymnasium as gym
 import numpy as np
 import torch
 from torch.distributions import Independent, Normal
@@ -70,8 +70,8 @@ def get_args():
     return args
 
 
-def test_ppo(trader, trader_id, w, agent_type, ticker, args=get_args()):
-    test_steps = 4#000
+def test_ppo(trader, trader_id, identifiers, agent_type, ticker, args=get_args()):
+    test_steps = 10
 
     try:
         #natural stop:
@@ -85,10 +85,11 @@ def test_ppo(trader, trader_id, w, agent_type, ticker, args=get_args()):
                 nTimeStep=10,
                 ODBK_range=5,
                 symbol=ticker,
+                action_sym = identifiers[3],
                 max_order_list_length=20,
-                weight = w,
-                gamma = 0.15,#increased from 0.09 to 0.15
-                tar_m = 0.6)
+                weight = identifiers[0],
+                gamma = identifiers[1],#increased from 0.09 to 0.15
+                tar_m = identifiers[2])  #increased from 0.6
             
             args.state_shape = env.observation_space.shape or env.observation_space.n
             args.action_shape = env.action_space.shape or env.action_space.n
@@ -126,16 +127,15 @@ def test_ppo(trader, trader_id, w, agent_type, ticker, args=get_args()):
                 trader=trader,
                 symbol=ticker,
                 step_time=1,
-                order_size=19,
-                target_buy_frac=w,
-                target_sell_frac=1-w,
-                risk_aversion=0.9, #increased from 0.5
-                pnl_weighting=0.5,
+                order_size=identifiers[3],
+                target_buy_frac=identifiers[2],
+                target_sell_frac=1-identifiers[2],
+                risk_aversion=identifiers[1], #increased from 0.5
+                pnl_weighting=identifiers[0],
                 normalizer=0.01,
                 order_book_range=5,
                 max_iterations=None,
             )
-            print(w, 1-w)
             train_envs = [env]
             args.state_shape = env.observation_space.shape or env.observation_space.n
             args.action_shape = env.action_space.shape or env.action_space.n
@@ -291,7 +291,23 @@ if __name__ == "__main__":
     num_proc = 14
     trader_list = []
     threads = []
-    weights = [0.8, 0.7, 0.2, 0.3, 0.2, 0.4, 0.5, 0.6, 0.8, 0.2, 0.4, 0.5, 0.6, 0.8]#
+    #agent identifiers:
+    identifiers = [#MM: weight, gamma,  tar_m,  act_sym("reg","far")
+                        [0.8,   0.15,   0.5,    [-1,1]],                #1
+                        [0.7,   0.15,   0.5,    [-1,1]],                #2
+                        [0.2,   0.15,   0.5,    [-1,1]],                #3
+                        [0.2,   0.15,   1,      [-1,2]],                #4
+                   #LT: weight, gamma,  targetBuyFrac,  order_size
+                        [0.5,   0.9,    0.2,            19],            #1
+                        [0.5,   0.9,    0.4,            19],            #2
+                        [0.5,   0.9,    0.5,            19],            #3
+                        [0.5,   0.9,    0.6,            19],            #4
+                        [0.5,   0.9,    0.8,            19],            #5
+                        [0.5,   0.9,    0.2,            19],            #6
+                        [0.5,   0.9,    0.4,            19],            #7
+                        [0.5,   0.9,    0.5,            19],            #8
+                        [0.5,   0.9,    0.6,            19],            #9
+                        [0.5,   0.9,    0.8,            19]]            #10
     agent_type = ["mm", "mm", "mm", "mm", "lt", "lt", "lt", "lt","lt", "lt", "lt", "lt", "lt","lt"]#
     args = get_args()
     #args.resume = True  #resume or not
@@ -302,21 +318,22 @@ if __name__ == "__main__":
         elif ticker == "CS2": mm_index, lt_index = 2, 10
         for i in range(num_proc):
             if agent_type[i] == "mm":
-                trader_list.append(shift.Trader(f"marketmaker_rl_{mm_index+1}"))
-                threads.append(Thread(target=test_ppo,args =(trader_list[i], f"mm{mm_index+1}", weights[i], agent_type[i], ticker, args)))        
+                num = "{:02d}".format(mm_index+1)
+                trader_list.append(shift.Trader(f"marketmaker_rl_{num}"))
+                threads.append(Thread(target=test_ppo,args =(trader_list[i], f"mm{mm_index+1}", identifiers[i], agent_type[i], ticker, args)))        
                 mm_index += 1
 
             elif agent_type[i] == "lt":
                 num = "{:02d}".format(lt_index+1)
                 trader_list.append(shift.Trader(f"liquiditytaker_rl_{num}"))
-                threads.append(Thread(target=test_ppo,args =(trader_list[i], f"lt{lt_index+1}", weights[i], agent_type[i], ticker, args)))        
+                threads.append(Thread(target=test_ppo,args =(trader_list[i], f"lt{lt_index+1}", identifiers[i], agent_type[i], ticker, args)))        
                 lt_index += 1
 
     
     try:
         for i in range(len(trader_list)):#len(tickers)*
             trader_list[i].disconnect()
-            trader_list[i].connect("/home/shiftpub/initiator.cfg", "password")
+            trader_list[i].connect("initiator.cfg", "password")
             trader_list[i].sub_all_order_book()
             sleep(1)
             print(f"bp of {i+1}:",trader_list[i].get_portfolio_summary().get_total_bp())

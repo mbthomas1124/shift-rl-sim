@@ -24,7 +24,7 @@ then
     # Kill python processes and SHIFT, then sync file
     for val in ${StringArray[@]}; do
         kill_all ${val};
-        send_dir ${val} ~/shift-rl-sim/;
+        send_dir ${val} ~/shift-rl-sim
     done
 
 elif [ "$mode" = "stop" ]
@@ -36,7 +36,6 @@ then
     for val in ${StringArray[@]}; do
         kill_all ${val};
     done
-
 elif [ "$mode" = "fetch" ]
 then
 	# Script of remote control functions 

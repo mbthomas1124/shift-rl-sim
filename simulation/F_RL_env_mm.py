@@ -4,7 +4,7 @@ import numpy as np
 import time
 import os
 import shift
-import gym
+import gymnasium as gym
 from copy import deepcopy
 
 
@@ -33,7 +33,7 @@ class CirList:
         return str(self.getData())
 
 
-class SHIFT_env:
+class SHIFT_env(gym.Env):
     orders = (shift.Order.Type.MARKET_SELL, 
               shift.Order.Type.MARKET_BUY, 
               shift.Order.Type.LIMIT_SELL, 
@@ -47,7 +47,7 @@ class SHIFT_env:
                  nTimeStep,
                  ODBK_range,
                  symbol,
-                 action_sym = "reg",
+                 action_sym = [-1,1],
                  commission = 0,
                  rebate = 0,
                  save_data = True, 
@@ -136,7 +136,7 @@ class SHIFT_env:
         #Actions: ############
         #self.maxsize = 8                  ##############################important for action size#########################################        
         #now it's % instead of action order size                                #5 to 50 order size
-        self.action_space= gym.spaces.Box(low = np.array([0.000005, -1, -1]), high = np.array([0.00005, 1.2, 1]), shape = (3,)) #gym.spaces.Box(low = np.array([1]), high = np.array([5])) #dtype=np.float32, 
+        self.action_space= gym.spaces.Box(low = np.array([0.000005, action_sym[0], -1]), high = np.array([0.00005, action_sym[1], 1]), shape = (3,)) #gym.spaces.Box(low = np.array([1]), high = np.array([5])) #dtype=np.float32, 
         self.observation_space = gym.spaces.Box(np.array([0,0,0,0, 0,0,0,0,0,  -np.inf, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 
                                                np.array([0,0,0,0,
                                                          np.inf, np.inf, np.inf, np.inf, np.inf, np.inf,
@@ -403,7 +403,7 @@ class SHIFT_env:
         # print([np.array(state)])
         #print(reward)
         # print(actions)
-        return np.array(state), reward, done, dict()
+        return np.array(state), reward, done, False, dict()
             
             
     def _maintain_order_list(self):
@@ -441,7 +441,7 @@ class SHIFT_env:
         self.close_positions()
         self.current_state_info = self.compute_state_info() 
         print(self.get_states())
-        return self.get_states()
+        return self.get_states(), dict()
     
     def cancel_all(self):
         
