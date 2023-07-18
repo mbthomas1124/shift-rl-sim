@@ -38,6 +38,7 @@ patsy==0.5.3
 PettingZoo==1.22.3
 Pillow==9.5.0
 protobuf==3.20.3
+psycopg2==2.9.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pyparsing==3.0.9
@@ -52,7 +53,7 @@ seaborn==0.12.2
 shift==2.0.0
 Shimmy==0.2.1
 six==1.16.0
-SQLAlchemy==2.0.18
+SQLAlchemy==1.4.17
 statsmodels==0.13.5
 tensorboard==2.11.2
 tensorboard-data-server==0.6.1

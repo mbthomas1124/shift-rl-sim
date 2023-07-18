@@ -66,7 +66,7 @@ def __get_series(ob):
     return midprices, spreads
 
 
-def get_stats(in_data, filename):
+def get_stats(symbol, in_data, trade_recs, filename):
     # PARAMS:
     # ob: a tuple containing a list of bid-side order books and a list of spread-side order books
     # filename: the name of the resulting pdf file
@@ -121,6 +121,13 @@ def get_stats(in_data, filename):
         axis=1,
     )
     data["volume_inbalance"] = np.subtract(data["bid_volume"], data["ask_volume"])
+
+    trade_recs = trade_recs[trade_recs["symbol"] == symbol]
+    trade_recs = trade_recs[trade_recs["decision"] == 2]
+    trade_recs = trade_recs[trade_recs["destination"] == "SHIFT"]
+    trade_recs['execution_time'] = pd.to_datetime(trade_recs['execution_time'])
+    trade_recs = trade_recs.set_index("execution_time")
+    trade_recs["sum_over_time"] = trade_recs["size"].rolling("2s").sum()
 
     with pd.option_context("mode.use_inf_as_null", True):
         data = data.dropna()
@@ -193,11 +200,25 @@ def get_stats(in_data, filename):
     plt.legend()
     plt.title("order book volumes")
 
+    # trade volume
+    plt.figure()
+    ax = plt.plot(trade_recs["size"])
+    plt.title("trading volume per transaction")
+
+
+    # trade volume summed over time
+    plt.figure()
+    ax = plt.plot(trade_recs["sum_over_time"])
+    plt.title("trading volume per 2 secs")
+
     # call the function
     __save_image(filename)
 
 
 if __name__ == "__main__":
+    ticker = "CS1"
     file = "sep_trader_mm1(3).csv"
+    trading_records = "trading_records.csv"
     df = pd.read_csv(file)
-    get_stats(df, "stats_3.pdf")
+    tr = pd.read_csv(trading_records)
+    get_stats(ticker, df, tr, "stats_3.pdf")
