@@ -340,7 +340,7 @@ class SHIFT_env(gym.Env):
         bid_depth = int(len(Bid_book))
         ask_depth = int(len(Ask_book))
         #get current total pl by size:
-        self.total_pl = self.trader.get_portfolio_summary().get_total_realized_pl()
+        self.total_pl = self.trader.get_portfolio_summary().get_total_realized_pl()# + self.trader.get_unrealized_pl(symbol=self.symbol)
         #action = [5,1,0,1]
         self.load_action_by_index(actions)
         #print("actions", actions)
@@ -356,7 +356,7 @@ class SHIFT_env(gym.Env):
         state = self.get_states()  #: identifiers | his_prices | current_inventory | last market share | ask book | bid book | different hedge cost | bp
         #print(state)
         #calculate reward: ###########################################################################################################################################
-        recent_pl_change = self.trader.get_portfolio_summary().get_total_realized_pl() - self.total_pl
+        recent_pl_change = self.trader.get_portfolio_summary().get_total_realized_pl()# + self.trader.get_unrealized_pl(symbol=self.symbol) - self.total_pl
         #market share
         current_order_sizes = 0
         for order in self.trader.get_waiting_list():

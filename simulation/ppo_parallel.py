@@ -39,7 +39,7 @@ def get_args():
     parser.add_argument('--buffer-size', type=int, default=5)
     parser.add_argument('--lr', type=float, default=0.0001)
     parser.add_argument('--gamma', type=float, default=0.95)
-    parser.add_argument('--epoch', type=int, default=1)
+    parser.add_argument('--epoch', type=int, default=360)
     parser.add_argument('--step-per-epoch', type=int, default=100)
     parser.add_argument('--episode-per-collect', type=int, default=20)
     parser.add_argument('--repeat-per-collect', type=int, default=2)
@@ -215,6 +215,7 @@ def test_ppo(trader, trader_id, identifiers, agent_type, ticker, args=get_args()
 
         def save_checkpoint_fn(epoch, env_step, gradient_step):
             ckpt_path = os.path.join(checkpoint_path, f"checkpoint_{trader_id}.pth")
+            print("saved checkpoint")
             torch.save(
                 {
                     "model": policy.state_dict(),
@@ -333,7 +334,7 @@ if __name__ == "__main__":
     try:
         for i in range(len(trader_list)):#len(tickers)*
             trader_list[i].disconnect()
-            trader_list[i].connect("initiator.cfg", "password")
+            trader_list[i].connect("/home/shiftpub/initiator.cfg", "password")
             trader_list[i].sub_all_order_book()
             sleep(1)
             print(f"bp of {i+1}:",trader_list[i].get_portfolio_summary().get_total_bp())

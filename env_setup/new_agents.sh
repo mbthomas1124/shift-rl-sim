@@ -32,3 +32,6 @@ BrokerageCenter -u liquiditytaker_rl_17 -p password -i Liquidity Taker liquidity
 BrokerageCenter -u liquiditytaker_rl_18 -p password -i Liquidity Taker liquiditytaker18@shift -s
 BrokerageCenter -u liquiditytaker_rl_19 -p password -i Liquidity Taker liquiditytaker19@shift -s
 BrokerageCenter -u liquiditytaker_rl_20 -p password -i Liquidity Taker liquiditytaker20@shift -s
+
+#flash crash agent:
+BrokerageCenter -u flash_crash_maker -p password -i Flash Crash flashcrash@shift -s

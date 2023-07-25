@@ -66,6 +66,9 @@ if __name__ == "__main__":
                                 trader = f"agent{i}",
                                 portfolio = {"cash": 1000000, "CS1": 2000})"""
         setup_init_portfolio(
+            con=con, trader="flash_crash_maker", portfolio={"CS1": 2000000}
+        )
+        setup_init_portfolio(
             con=con, trader="marketmaker_rl_01", portfolio={"cash": 10000000000}
         )  # , "CS1": 200000000      #1 billion for comp_rl_mm
         setup_init_portfolio(

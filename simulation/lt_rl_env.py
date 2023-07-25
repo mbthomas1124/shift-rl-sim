@@ -92,7 +92,7 @@ class SHIFT_env(gym.Env):
         sleep(5)
 
         # reward trackers
-        self.initial_pnl = self.trader.get_portfolio_item(self.symbol).get_realized_pl()
+        self.initial_pnl = self.trader.get_portfolio_item(self.symbol).get_realized_pl()# + self.trader.get_unrealized_pl(symbol=self.symbol)
         self.initial_mp = self.get_state()[self.n_time_step - 1]
         self.initial_inv_pnl = 0
 
@@ -277,7 +277,7 @@ class SHIFT_env(gym.Env):
             self.stats["filled"].append(True)
 
         # REWARD: #################################################################################################################
-        curr_pnl = self.trader.get_portfolio_item(self.symbol).get_realized_pl()
+        curr_pnl = self.trader.get_portfolio_item(self.symbol).get_realized_pl()# + self.trader.get_unrealized_pl(symbol=self.symbol)
         pnl = curr_pnl - self.initial_pnl
         self.initial_pnl = curr_pnl
         curr_mp = state[0 + offset]
