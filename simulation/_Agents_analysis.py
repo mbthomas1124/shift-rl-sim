@@ -53,7 +53,7 @@ def find_max_min(data_list, num_agents):
     average = (abs(Min)+abs(Max))/2
     return (Min - (average*gap_ratio), Max + (average*gap_ratio))
 
-def get_MM_stats(num_MM, mov_avg_frame):
+def get_MM_stats(num_MM, mov_avg_frame, folder_num):
     # PARAMS:
     # num_MM: number of MM agents
     # filename: the name of the resulting pdf file
@@ -61,9 +61,12 @@ def get_MM_stats(num_MM, mov_avg_frame):
     plt.rcParams["figure.figsize"] = [12, 3.50]
     plt.rcParams["figure.autolayout"] = True
 
+    add = 0
+    if folder_num == 2:
+        add = 4
     data_list = []
     for i in range(num_MM):
-        data_list.append(pd.read_csv(f"sep_trader_mm{i+1}.csv"))
+        data_list.append(pd.read_csv(f"sep_trader_mm{i+1+add}.csv"))
     
     #Average reward comparison:
     plt.figure()
@@ -106,7 +109,7 @@ def get_MM_stats(num_MM, mov_avg_frame):
         plt.plot(temp_list[i])
         plt.title(f"MM{i+1}_Action_Sym{mov_avg_frame}")
         plt.xlabel('Step')
-        plt.ylabel('[-1, 1.2]')
+        #plt.ylabel('Action')
         plt.axhline(y = 0, color = 'black', linestyle = '-')
         plt.ylim(ylim)
 
@@ -121,7 +124,7 @@ def get_MM_stats(num_MM, mov_avg_frame):
         plt.plot(temp_list[i])
         plt.title(f"MM{i+1}_Action_Asym{mov_avg_frame}")
         plt.xlabel('Step')
-        plt.ylabel('[-1, 1]')
+        #plt.ylabel('Action')
         plt.axhline(y = 0, color = 'black', linestyle = '-')
         plt.ylim(ylim)
         
@@ -170,14 +173,18 @@ def get_MM_stats(num_MM, mov_avg_frame):
         plt.ylim(ylim)
         
 
-def get_LT_stats(num_LT, mov_avg_frame):
+def get_LT_stats(num_LT, mov_avg_frame, folder_num):
 
     plt.rcParams["figure.figsize"] = [12, 3.50]
     plt.rcParams["figure.autolayout"] = True
 
+    add = 0
+    if folder_num == 2:
+        add = 10
+
     data_list = []
     for i in range(num_LT):
-        data_list.append(pd.read_csv(f"sep_trader_lt{i+1}.csv"))
+        data_list.append(pd.read_csv(f"sep_trader_lt{i+1+add}.csv"))
     
     #Average reward comparison:
     temp_list = []
@@ -276,9 +283,9 @@ def get_LT_stats(num_LT, mov_avg_frame):
             plt.axhline(y = 0, color = 'black', linestyle = '-')
             plt.ylim(ylim)
             
-def generate_report(num_MM, num_LT, mov_avg_frame, output_file):
-    get_MM_stats(num_MM, mov_avg_frame)
-    get_LT_stats(num_LT, mov_avg_frame)
+def generate_report(num_MM, num_LT, mov_avg_frame, output_file, folder_num):
+    get_MM_stats(num_MM, mov_avg_frame,folder_num)
+    get_LT_stats(num_LT, mov_avg_frame,folder_num)
     __save_image(output_file)
 
 
@@ -289,4 +296,12 @@ if __name__ == "__main__":
     num_periods = 1
     mov_avg_frame = 100
     output_file = "_Agent_Stat.pdf"
-    generate_report(num_MM, num_LT, mov_avg_frame, output_file)
+    generate_report(num_MM, num_LT, mov_avg_frame, output_file, 1)
+
+    # os.chdir("/home/shiftpub/Results_Simulation2/iteration_info")
+    # num_MM = 4
+    # num_LT = 10
+    # num_periods = 1
+    # mov_avg_frame = 100
+    # output_file = "_Agent_Stat.pdf"
+    # generate_report(num_MM, num_LT, mov_avg_frame, output_file, 2)

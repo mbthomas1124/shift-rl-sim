@@ -9,9 +9,9 @@ cd ~/shift-rl-sim
 # create conda environment
 mkdir temp_download
 cd temp_download/
-conda create -n sep_rlsim python=3.7 -y
+conda create -n rlsim python=3.7 anaconda -y
 conda clean --all -y
-conda activate sep_rlsim
+conda activate rlsim
 
 # install shift
 wget https://github.com/hanlonlab/shift-python/releases/download/v2.0.1/shift_python-2.0.1-conda_linux.zip

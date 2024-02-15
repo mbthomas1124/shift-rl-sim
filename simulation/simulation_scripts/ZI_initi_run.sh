@@ -68,7 +68,7 @@ function start_sim
 
     # 2-stock scenario
     cd ~/SHIFT
-    ./startup.sh
+    ./startup.sh -t 1440
     cd /home/shiftpub/shift-rl-sim/agents/ZITrader
     ./batch2.sh
 

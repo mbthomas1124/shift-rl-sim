@@ -14,8 +14,8 @@ class SHIFT_env(gym.Env):
         symbol,
         step_time=2,
         order_size=8,
-        target_buy_frac=0.5,
-        target_sell_frac=0.5,
+        target_buy_sell_flows = [[0.5], [0.3]],
+        switch_steps = 1000,
         risk_aversion=0.5,
         pnl_weighting=0.5,
         normalizer=0.01,
@@ -25,9 +25,12 @@ class SHIFT_env(gym.Env):
         self.trader = trader
         self.symbol = symbol
         self.step_time = step_time
+        self.order_bp = order_size*100*100
         self.order_size = order_size
-        self.targ_buy_frac = target_buy_frac
-        self.targ_sell_frac = target_sell_frac
+        self.target_buy_sell_flows = target_buy_sell_flows
+        self.targ_buy_frac = self.target_buy_sell_flows[0][0]
+        self.targ_sell_frac = self.target_buy_sell_flows[1][0]
+        self.switch_steps = switch_steps
         self.gamma = risk_aversion
         self.alpha = normalizer
         self.w = pnl_weighting
@@ -45,6 +48,7 @@ class SHIFT_env(gym.Env):
         self.midprice_list = deque(maxlen=self.n_time_step)
         self.data_thread_alive = True
         self.data_thread.start()
+        self.order_queue = deque(maxlen=100)
         self.buy_count = 0
         self.sell_count = 0
         self.steps_elapsed = 0
@@ -96,10 +100,14 @@ class SHIFT_env(gym.Env):
         self.initial_mp = self.get_state()[self.n_time_step - 1]
         self.initial_inv_pnl = 0
 
+        while self.trader.get_last_price(self.symbol) == 0:
+            sleep(1)
+            print("LT waiting")
+
     def lp_action(self, ticker, signal):
         def func(trader):
             order_id = None
-
+            self.order_size = round(self.order_bp / (trader.get_last_price(ticker) * 100))
             if signal == 1:
                 # buy
                 if trader.get_portfolio_summary().get_total_bp() > (
@@ -257,9 +265,13 @@ class SHIFT_env(gym.Env):
         # ACTION: #################################################################################################################
         order_id = self.execute_action(action)
         if act_dir == -1:
-            self.sell_count += 1
+            self.order_queue.append(-1)
+            self.sell_count = self.order_queue.count(-1)
         elif act_dir == 1:
-            self.buy_count += 1
+            self.order_queue.append(1)
+            self.buy_count = self.order_queue.count(1)
+        elif act_dir == 0:
+            self.order_queue.append(0)
         self.steps_elapsed += 1
 
         sleep(self.step_time)
@@ -287,12 +299,12 @@ class SHIFT_env(gym.Env):
         self.initial_inv_pnl += curr_inv * (curr_mp - self.initial_mp)
         total_pnl = pnl - (self.gamma * abs(inv_pnl))
         curr_q = (
-            abs(self.targ_buy_frac - (self.buy_count / self.steps_elapsed))
-            + abs(self.targ_sell_frac - (self.sell_count / self.steps_elapsed))
+            abs(self.targ_buy_frac - (self.buy_count / len(self.order_queue)))
+            + abs(self.targ_sell_frac - (self.sell_count / len(self.order_queue)))
         ) / 2
         delta_q = curr_q - self.prev_q
         self.prev_q = curr_q
-        reward = (self.w * self.alpha * total_pnl) + ((1 - self.w) * delta_q)
+        reward = (self.w * self.alpha * total_pnl) - ((1 - self.w) * delta_q)
         # print(f"{self.symbol} Reward: {reward}")
 
         # end conditions
@@ -315,9 +327,15 @@ class SHIFT_env(gym.Env):
             sum(state[(5 + offset) : (6 + offset + self.order_book_range)])
         )
         self.stats["ask_vol"].append(sum(state[(5 + offset + self.order_book_range) :]))
-        self.stats["buy_frac"].append(self.buy_count / self.steps_elapsed)
-        self.stats["sell_frac"].append(self.sell_count / self.steps_elapsed)
+        self.stats["buy_frac"].append(self.buy_count / len(self.order_queue))
+        self.stats["sell_frac"].append(self.sell_count / len(self.order_queue))
         self.stats["curr_q"].append(curr_q)
+
+        if self.switch_steps != 0:
+            if self.steps_elapsed % self.switch_steps == 0:
+                index = int(self.steps_elapsed / self.switch_steps)
+                self.targ_buy_frac = self.target_buy_sell_flows[0][index % len(self.target_buy_sell_flows[0])]
+                self.targ_sell_frac = self.target_buy_sell_flows[1][index % len(self.target_buy_sell_flows[1])]
 
         return state, reward, done, False, dict()
 

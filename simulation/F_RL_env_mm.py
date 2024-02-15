@@ -6,6 +6,7 @@ import os
 import shift
 import gymnasium as gym
 from copy import deepcopy
+from datetime import datetime
 
 
 class CirList:
@@ -96,7 +97,9 @@ class SHIFT_env(gym.Env):
         self.table = CirList(nTimeStep) #contains: 'curr_mp', 'volume_ask', 'volume_bid', 'remained_bp'
         self._cols = ['reward', 'action_size', 'action_sym', 'action_asym', 'recent_pl_change', 'change_inven_pnl', 
                       'diff_market_share', 'curr_mp', 'current_inventory', 'current_market_share', 'total_volume', 'bp', "spread",
-                      "bid_5","bid_4", "bid_3","bid_2","bid_1", "ask_1", "ask_2","ask_3","ask_4","ask_5", "Bid_depth","Ask_depth"]
+                      "bid_5","bid_5_p","bid_4","bid_4_p","bid_3","bid_3_p","bid_2","bid_2_p","bid_1","bid_1_p",
+                      "ask_1_p","ask_1","ask_2_p","ask_2","ask_3_p","ask_3","ask_4_p","ask_4","ask_5_p","ask_5", 
+                      "Bid_depth","Ask_depth"]#, "time"
 
         self.df = pd.DataFrame(columns=self._cols)
         self.df_idx = 0
@@ -137,12 +140,12 @@ class SHIFT_env(gym.Env):
         #self.maxsize = 8                  ##############################important for action size#########################################        
         #now it's % instead of action order size                                #5 to 50 order size
         self.action_space= gym.spaces.Box(low = np.array([0.000005, action_sym[0], -1]), high = np.array([0.00005, action_sym[1], 1]), shape = (3,)) #gym.spaces.Box(low = np.array([1]), high = np.array([5])) #dtype=np.float32, 
-        self.observation_space = gym.spaces.Box(np.array([0,0,0,0, 0,0,0,0,0,  -np.inf, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 
+        self.observation_space = gym.spaces.Box(np.array([0,0,0,0, 0,0,0,0,0,  -np.inf, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 
                                                np.array([0,0,0,0,
                                                          np.inf, np.inf, np.inf, np.inf, np.inf, np.inf,
                                                          np.inf, np.inf, np.inf, np.inf, np.inf, np.inf,
                                                          np.inf, np.inf, np.inf, np.inf, np.inf, np.inf,
-                                                         np.inf, np.inf, np.inf]), dtype = np.float64)
+                                                         ]), dtype = np.float64)
         
 
         #new:
@@ -197,19 +200,25 @@ class SHIFT_env(gym.Env):
             time.sleep(self.info_step)
         print('Data Thread stopped.')
     
-    def LOB_to_list(self, ask_book, bid_book, best_p, bp, item): #return a list with these info 'curr_mp', 'ask_book', 'bid_book', 'remained_bp', inventory, spread    
+    def LOB_to_list(self, ask_book, bid_book, best_p, bp, item): #return a list with these info 'curr_mp', 'ask_book', 'bid_book', 'remained_bp', inventory, spread, 'ask_book_price', 'bid_book_price' 
         # get LOB
         bid_b = []
         ask_b = []
+        bid_p = []
+        ask_p = []
         for order in ask_book:
             ask_b.append(order.size) 
+            ask_p.append(order.price) 
         for order in bid_book:
             bid_b.append(order.size)
+            bid_p.append(order.price)
         
         while len(ask_b) < 5:
-                ask_b.append(0)
+            ask_b.append(0)
+            ask_p.append(0)
         while len(bid_b) < 5:
             bid_b.append(0)
+            bid_p.append(0)
             
         #inventory:
         short_shares = int(item.get_short_shares())
@@ -234,10 +243,10 @@ class SHIFT_env(gym.Env):
         self.last_available_price = mid
         self.last_available_sp = sp
 
-        return [mid, ask_b, bid_b, bp, inventory, sp]
+        return [mid, ask_b, bid_b, bp, inventory, sp, ask_p, bid_p]
 
     def compute_state_info(self):
-        #return the following items 'curr_mp', 'ask_book', 'bid_book', 'remained_bp', 'current_inventory', spread, "his_prices", 'current_inventory_pnl', total_volume
+        #return the following items 'curr_mp', 'ask_book', 'bid_book', 'remained_bp', 'current_inventory', spread, "his_prices", 'current_inventory_pnl', total_volume, 'ask_book_price', 'bid_book_price' 
         big_to_small = int(self.rl_t / self.info_step)  #since 5 * 0.4 = 2 which is the time for each step
         tab = self.table
         while True:
@@ -257,7 +266,7 @@ class SHIFT_env(gym.Env):
                 total_volume = np.sum(book)
                 #mean_inven_pnl = np.mean(his_inventory_pnl_np)
                 #std_inven_pnl = abs(np.std(his_inventory_pnl_np))
-                return (tab.getData()[self.nTimeStep-1][0:6] + [his_mp[5:self.nTimeStep]] + [current_inventory_pnl, total_volume])
+                return (tab.getData()[self.nTimeStep-1][0:6] + [his_mp[5:self.nTimeStep]] + [current_inventory_pnl, total_volume]+tab.getData()[self.nTimeStep-1][6:])
             else:
                 print("need to wait for table to fill up")
                 time.sleep(1)
@@ -285,6 +294,7 @@ class SHIFT_env(gym.Env):
         mid = self.table.getData()[self.nTimeStep-1][0]
         spread = self.table.getData()[self.nTimeStep-1][5]
         #*********************************************************need to ask if ok**********************************************
+        spread = self.df["spread"][-20:].mean()
         if spread == 0: spread = 0.01
         #elif spread > 1: spread = 0.01
         # get inventory
@@ -307,12 +317,7 @@ class SHIFT_env(gym.Env):
 
     
     def get_states(self):
-        #returns:  identifiers | his_prices | current_inventory | last market share | ask book | bid book | different hedge cost | bp
-        
-        hedge_ratio = np.array([0.2, 0.5, 0.8], dtype=np.float32)
-        hf_sp = abs(round((self.current_state_info[5] / 2), 3))
-        diff_hedging_cost = ((hf_sp * abs(self.current_state_info[4])) * hedge_ratio).tolist()
-        #is bp at risk
+        #returns:  identifiers | his_prices | current_inventory | last market share | ask book | bid book |  bp
         #identifier:
         ident = [self.alpha, self.w, self.gamma, self.target_market_share]
         """
@@ -320,7 +325,7 @@ class SHIFT_env(gym.Env):
         if self.current_state_info[3] <= self.bp_thres:
             is_bp_risk = 1"""
         #print(np.array(self.current_state_info[6] + [self.current_state_info[4]] + [self.last_market_share] + self.current_state_info[1] + self.current_state_info[2] + diff_hedging_cost))
-        return np.array(ident + self.current_state_info[6] + [self.current_state_info[4]] + [self.last_market_share] + self.current_state_info[1] + self.current_state_info[2] + diff_hedging_cost + [100*self.current_state_info[3]/self.init_bp])
+        return np.array(ident + self.current_state_info[6] + [self.current_state_info[4]] + [self.last_market_share] + self.current_state_info[1] + self.current_state_info[2] + [100*self.current_state_info[3]/self.init_bp])
     
     def step(self, actions):
         if self.init:
@@ -333,14 +338,15 @@ class SHIFT_env(gym.Env):
             self.trader.submit_order(limit_sell)
             time.sleep(3)
         actions = actions
+        #get current total pl by size:
+        self.total_pl = self.trader.get_portfolio_summary().get_total_realized_pl()# + self.trader.get_unrealized_pl(symbol=self.symbol)
         #print(f"ticker{self.symbol}, action {action}")
         #save LOB depth info:
         Ask_book = self.trader.get_order_book(self.symbol, shift.OrderBookType.LOCAL_ASK, 99)
         Bid_book = self.trader.get_order_book(self.symbol, shift.OrderBookType.LOCAL_BID, 99)
         bid_depth = int(len(Bid_book))
         ask_depth = int(len(Ask_book))
-        #get current total pl by size:
-        self.total_pl = self.trader.get_portfolio_summary().get_total_realized_pl()# + self.trader.get_unrealized_pl(symbol=self.symbol)
+        
         #action = [5,1,0,1]
         self.load_action_by_index(actions)
         #print("actions", actions)
@@ -350,13 +356,13 @@ class SHIFT_env(gym.Env):
         
         #STATES: 7 components: ##################################################################################################################
         #   identifiers | his_prices | current_inventory | last market share | ask book | bid book | different hedge cost 
-        state_info = self.compute_state_info() #:'curr_mp', 'ask_book', 'bid_book', 'remained_bp', 'current_inventory', spread, "his_prices", 'current_inventory_pnl', total_volume
+        state_info = self.compute_state_info() #:'curr_mp', 'ask_book', 'bid_book', 'remained_bp', 'current_inventory', spread, "his_prices", 'current_inventory_pnl', total_volume, 'ask_book_price', 'bid_book_price' 
         #print(state_info)
         self.current_state_info = state_info
-        state = self.get_states()  #: identifiers | his_prices | current_inventory | last market share | ask book | bid book | different hedge cost | bp
+        state = self.get_states()  #: identifiers | his_prices | current_inventory | last market share | ask book | bid book | bp
         #print(state)
         #calculate reward: ###########################################################################################################################################
-        recent_pl_change = self.trader.get_portfolio_summary().get_total_realized_pl()# + self.trader.get_unrealized_pl(symbol=self.symbol) - self.total_pl
+        recent_pl_change = self.trader.get_portfolio_summary().get_total_realized_pl() - self.total_pl# + self.trader.get_unrealized_pl(symbol=self.symbol) 
         #market share
         current_order_sizes = 0
         for order in self.trader.get_waiting_list():
@@ -381,6 +387,14 @@ class SHIFT_env(gym.Env):
         
         done = False
         
+        lob = []
+        for i in range(5):
+            lob.append(state_info[2][::-1][i])
+            lob.append(state_info[10][::-1][i])
+        for i in range(5):
+            lob.append(state_info[9][i])
+            lob.append(state_info[1][i])
+            
         
 
 
@@ -390,7 +404,7 @@ class SHIFT_env(gym.Env):
              # 'curr_mp', 'current_inventory', 'current_market_share', 'total_volume', 'bp', "spread","bid_5","bid_4", "bid_3","bid_2","bid_1", "ask_1", "ask_2","ask_3","ask_4","ask_5"]
             tmp = [reward, actions[0], actions[1], actions[2], recent_pl_change, change_inven_pnl, 
                    diff_market_share] + [curr_mp, current_inventory, current_market_share, total_volume, 
-                                         bp, state_info[5]] + state_info[2][::-1] + state_info[1] + [bid_depth, ask_depth]
+                                         bp, state_info[5]] + lob + [bid_depth, ask_depth] #+ [datetime.now()]
             self.df.loc[self.df_idx] = tmp
             #print(tmp)
             self.df_idx += 1
@@ -400,7 +414,6 @@ class SHIFT_env(gym.Env):
             self.step_counter+=1
             if self.step_counter > self.natural_stop:
                 done = True
-        # print([np.array(state)])
         #print(reward)
         # print(actions)
         return np.array(state), reward, done, False, dict()

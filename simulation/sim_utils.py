@@ -66,7 +66,7 @@ if __name__ == "__main__":
                                 trader = f"agent{i}",
                                 portfolio = {"cash": 1000000, "CS1": 2000})"""
         setup_init_portfolio(
-            con=con, trader="flash_crash_maker", portfolio={"CS1": 2000000}
+            con=con, trader="flash_crash_maker_01", portfolio={"CS1": 2000000000}
         )
         setup_init_portfolio(
             con=con, trader="marketmaker_rl_01", portfolio={"cash": 10000000000}
@@ -109,4 +109,50 @@ if __name__ == "__main__":
         )
         setup_init_portfolio(
             con=con, trader="liquiditytaker_rl_10", portfolio={"cash": 100000000000}
+        )
+
+        setup_init_portfolio(
+            con=con, trader="flash_crash_maker_02", portfolio={"CS1": 2000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="marketmaker_rl_05", portfolio={"cash": 10000000000}
+        )  # , "CS1": 200000000      #1 billion for comp_rl_mm
+        setup_init_portfolio(
+            con=con, trader="marketmaker_rl_06", portfolio={"cash": 10000000000}
+        )  # , "CS1": 200000000
+        setup_init_portfolio(
+            con=con, trader="marketmaker_rl_07", portfolio={"cash": 10000000000}
+        )  # , "CS1": 200000000      #1 billion for comp_rl_mm
+        setup_init_portfolio(
+            con=con, trader="marketmaker_rl_08", portfolio={"cash": 10000000000}
+        )  # , "CS1": 200000000
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_11", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_12", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_13", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_14", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_15", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_16", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_17", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_18", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_19", portfolio={"cash": 100000000000}
+        )
+        setup_init_portfolio(
+            con=con, trader="liquiditytaker_rl_20", portfolio={"cash": 100000000000}
         )
