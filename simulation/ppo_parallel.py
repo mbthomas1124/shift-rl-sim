@@ -432,7 +432,7 @@ if __name__ == "__main__":
             #connect flash crash agent
             crash_maker = shift.Trader("flash_crash_maker_01")
             crash_maker.disconnect()
-            crash_maker.connect("/home/shiftpub/initiator.cfg", "password")
+            crash_maker.connect("/home/shiftpub/shift-rl-sim/simulation/initiator.cfg", "password")
             crash_maker.sub_all_order_book()
 
             flash_config = config_dic["flash_orders"]

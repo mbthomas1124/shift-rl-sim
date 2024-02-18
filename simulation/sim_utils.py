@@ -39,7 +39,7 @@ if __name__ == "__main__":
     import sqlalchemy
     import sys
 
-    sys.path.insert(1, "/home/shiftpub")
+    #sys.path.insert(1, "/home/shiftpub")
     from db_config import db_string
 
     print(db_string)

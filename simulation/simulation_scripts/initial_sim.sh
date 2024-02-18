@@ -4,6 +4,8 @@
 CURRENT_DIR="$( pwd )"
 
 #num_ticker = 6
+cd ~/shift-rl-sim/env_setup
+./new_agents.sh
 
 echo -e ${COLOR_WARNING}
 echo "Resetting portfolio and trading records..."

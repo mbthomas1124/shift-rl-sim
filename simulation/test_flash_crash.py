@@ -59,7 +59,7 @@ if __name__ == '__main__':
     trader1 = shift.Trader("flash_crash_maker")
 
     try:
-        trader1.connect("/home/shiftpub/initiator.cfg", "password")
+        trader1.connect("/home/shiftpub/shift-rl-sim/simulation/initiator.cfg", "password")
         #subscribe order book for all tickers
         trader1.sub_all_order_book()
         
